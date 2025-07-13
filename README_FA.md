@@ -10,8 +10,6 @@ Trust Tunnel یک تونل معکوس (Reverse Tunnel) امن، پایدار و 
 ```
 bash <(curl -Ls https://raw.githubusercontent.com/Erfan-XRay/TrustTunnel/main/main.sh)
 ```
-نکته: اسکریپت‌های `alpha.sh` و `beta.sh` اکنون تنها `main.sh` را اجرا می‌کنند.
-برای بهره‌مندی از آخرین قابلیت‌ها، مستقیماً از `main.sh` استفاده کنید.
 
 
 ---
