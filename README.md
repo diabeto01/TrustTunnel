@@ -9,8 +9,7 @@ Run the **main.sh** script on your server (Debian or Ubuntu):
 ```
 bash <(curl -Ls https://raw.githubusercontent.com/Erfan-XRay/TrustTunnel/main/main.sh)
 ```
-`main.sh` uses modular helper scripts stored in the `lib/` directory and is the single entry point.
-Each helper focuses on a single feature so `main.sh` stays small and easy to maintain.
+`main.sh` uses modular helper scripts stored in the `lib/` directory and is the single entry point. Each helper focuses on a single feature so `main.sh` stays small and easy to maintain.
 ### Modules under `lib/`
 - `colors.sh` and `utils.sh` for common helpers
 - `logs.sh` and `validation.sh`
