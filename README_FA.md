@@ -10,7 +10,6 @@ Trust Tunnel یک تونل معکوس (Reverse Tunnel) امن، پایدار و 
 ```
 bash <(curl -Ls https://raw.githubusercontent.com/Erfan-XRay/TrustTunnel/main/main.sh)
 ```
-
 اسکریپت main.sh از فایل‌های کمکی داخل پوشه lib استفاده می‌کند و تنها نقطهٔ ورود برنامه است.
 این ساختار ماژولار باعث می‌شود main.sh کوتاه بماند و هر قابلیت به صورت مستقل قابل به‌روزرسانی باشد.
 ### ماژول‌های موجود در `lib/`
@@ -21,6 +20,8 @@ bash <(curl -Ls https://raw.githubusercontent.com/Erfan-XRay/TrustTunnel/main/ma
 - `reverse.sh` و `direct.sh` برای حالت‌های سرور
 - `certificates.sh` برای مدیریت TLS
 - `menu.sh` پیاده‌ساز منوی تعاملی
+
+اسکریپت‌های قدیمی `alpha.sh` و `beta.sh` حذف شده‌اند؛ کافی‌ست `main.sh` را اجرا کنید.
 
 ---
 ## آموزش استفاده
