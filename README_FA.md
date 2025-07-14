@@ -11,9 +11,7 @@ Trust Tunnel یک تونل معکوس (Reverse Tunnel) امن، پایدار و 
 bash <(curl -Ls https://raw.githubusercontent.com/Erfan-XRay/TrustTunnel/main/main.sh)
 ```
 
-اسکریپت main.sh از فایل‌های کمکی داخل پوشه lib استفاده می‌کند تا مدیریت بخش‌ها آسان‌تر باشد.
-
-فایل‌های قدیمی alpha.sh و beta.sh حذف شده‌اند و حالا فقط main.sh نقطهٔ ورود برنامه است.
+اسکریپت main.sh از فایل‌های کمکی داخل پوشه lib استفاده می‌کند و تنها نقطهٔ ورود برنامه است.
 
 ---
 ## آموزش استفاده
