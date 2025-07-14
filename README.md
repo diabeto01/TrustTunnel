@@ -5,10 +5,11 @@
 ## What is Trust Tunnel?
 a secure , stable and fast reverse tunnel based on QUIC protocol(UDP/TCP).
 ## How to Run?
-Run the following script on your server (Debian or Ubuntu):
+Run the **main.sh** script on your server (Debian or Ubuntu):
 ```
 bash <(curl -Ls https://raw.githubusercontent.com/Erfan-XRay/TrustTunnel/main/main.sh)
 ```
+`main.sh` uses modular helper scripts stored in the `lib/` directory and is the single entry point.
 ## How to use ?
 [![Watch the video](https://img.youtube.com/vi/mwQJ4_pYLNc/hqdefault.jpg)](https://youtu.be/mwQJ4_pYLNc)
 ## ⚙️ Features
