@@ -13,6 +13,8 @@ bash <(curl -Ls https://raw.githubusercontent.com/Erfan-XRay/TrustTunnel/main/ma
 
 اسکریپت main.sh از فایل‌های کمکی داخل پوشه lib استفاده می‌کند تا مدیریت بخش‌ها آسان‌تر باشد.
 
+فایل‌های قدیمی alpha.sh و beta.sh حذف شده‌اند و حالا فقط main.sh نقطهٔ ورود برنامه است.
+
 ---
 ## آموزش استفاده
 [![Watch the video](https://img.youtube.com/vi/mwQJ4_pYLNc/hqdefault.jpg)](https://youtu.be/mwQJ4_pYLNc)

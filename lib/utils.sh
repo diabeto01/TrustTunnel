@@ -1,4 +1,4 @@
-# shellcheck disable=SC2154
+# Utility functions used across the script
 
 draw_line() {
   local color="$1"
