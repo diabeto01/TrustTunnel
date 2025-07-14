@@ -22,8 +22,6 @@ bash <(curl -Ls https://raw.githubusercontent.com/Erfan-XRay/TrustTunnel/main/ma
 - `certificates.sh` برای مدیریت TLS
 - `menu.sh` پیاده‌ساز منوی تعاملی
 
-اسکریپت‌های قدیمی **alpha.sh** و **beta.sh** تنها برای سازگاری حفظ شده‌اند و به سادگی `main.sh` را اجرا می‌کنند؛ پیشنهاد می‌شود مستقیماً `main.sh` اجرا شود.
-
 ---
 ## آموزش استفاده
 [![Watch the video](https://img.youtube.com/vi/mwQJ4_pYLNc/hqdefault.jpg)](https://youtu.be/mwQJ4_pYLNc)

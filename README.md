@@ -20,7 +20,6 @@ Each helper focuses on a single feature so `main.sh` stays small and easy to mai
 - `certificates.sh` for TLS handling
 - `menu.sh` which implements the interactive menu
 
-The legacy **alpha.sh** and **beta.sh** scripts remain as tiny wrappers that invoke `main.sh` for compatibility. Running `main.sh` directly is recommended.
 ## How to use ?
 [![Watch the video](https://img.youtube.com/vi/mwQJ4_pYLNc/hqdefault.jpg)](https://youtu.be/mwQJ4_pYLNc)
 ## ⚙️ Features
