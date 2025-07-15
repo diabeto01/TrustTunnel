@@ -13,8 +13,6 @@ bash <(curl -Ls https://raw.githubusercontent.com/Erfan-XRay/TrustTunnel/main/ma
 نکته: اسکریپت‌های `alpha.sh` و `beta.sh` اکنون تنها `main.sh` را اجرا می‌کنند.
 برای بهره‌مندی از آخرین قابلیت‌ها، مستقیماً از `main.sh` استفاده کنید.
 
-اسکریپت main.sh از فایل‌های کمکی داخل پوشه lib استفاده می‌کند و تنها نقطهٔ ورود برنامه است.
-
 ---
 ## آموزش استفاده
 [![Watch the video](https://img.youtube.com/vi/mwQJ4_pYLNc/hqdefault.jpg)](https://youtu.be/mwQJ4_pYLNc)
