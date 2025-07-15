@@ -58,10 +58,11 @@ while true; do
             echo ""
             echo -e "  ${YELLOW}1)${RESET} ${WHITE}Add new server${RESET}" # Add new server
             echo -e "  ${YELLOW}2)${RESET} ${WHITE}Show service logs${RESET}" # Show service logs
-            echo -e "  ${YELLOW}3)${RESET} ${WHITE}Delete service${RESET}" # Delete service
-            echo -e "  ${YELLOW}4)${RESET} ${MAGENTA}Schedule server restart${RESET}" # Schedule server restart
-            echo -e "  ${YELLOW}5)${RESET} ${RED}Delete scheduled restart${RESET}" # New option: Delete scheduled restart
-            echo -e "  ${YELLOW}6)${RESET} ${WHITE}Back to main menu${RESET}" # Back to main menu
+            echo -e "  ${YELLOW}3)${RESET} ${WHITE}Edit ports${RESET}" # Edit ports
+            echo -e "  ${YELLOW}4)${RESET} ${WHITE}Delete service${RESET}" # Delete service
+            echo -e "  ${YELLOW}5)${RESET} ${MAGENTA}Schedule server restart${RESET}" # Schedule server restart
+            echo -e "  ${YELLOW}6)${RESET} ${RED}Delete scheduled restart${RESET}" # New option: Delete scheduled restart
+            echo -e "  ${YELLOW}7)${RESET} ${WHITE}Back to main menu${RESET}" # Back to main menu
             echo ""
             draw_line "$GREEN" "-" 40 # Bottom border
             echo -e "👉 ${CYAN}Your choice:${RESET} " # Your choice:
@@ -84,6 +85,9 @@ while true; do
                 fi
               ;;
               3)
+                edit_server_ports_action
+              ;;
+              4)
                 clear
                 service_file="/etc/systemd/system/trusttunnel.service"
                 if [ -f "$service_file" ]; then
@@ -100,13 +104,13 @@ while true; do
                 echo -e "${YELLOW}Press Enter to return to previous menu...${RESET}" # Press Enter to return to previous menu...
                   read -p ""
               ;;
-              4) # Schedule server restart
+              5) # Schedule server restart
                 reset_timer "trusttunnel" # Pass the server service name directly
               ;;
-              5) # New case for deleting cron job
+              6) # New case for deleting cron job
                 delete_cron_job_action
               ;;
-              6)
+              7)
                 echo -e "${YELLOW}بازگشت به منوی اصلی...${RESET}" # Returning to main menu...
                 break 2 # Break out of both inner while and outer case
               ;;
@@ -131,10 +135,11 @@ while true; do
             echo ""
             echo -e "  ${YELLOW}1)${RESET} ${WHITE}Add new client${RESET}" # Add new client
             echo -e "  ${YELLOW}2)${RESET} ${WHITE}Show Client Log${RESET}" # Show Client Log
-            echo -e "  ${YELLOW}3)${RESET} ${WHITE}Delete a client${RESET}" # Delete a client
-            echo -e "  ${YELLOW}4)${RESET} ${BLUE}Schedule client restart${RESET}" # Schedule client restart
-            echo -e "  ${YELLOW}5)${RESET} ${RED}Delete scheduled restart${RESET}" # New option: Delete scheduled restart
-            echo -e "  ${YELLOW}6)${RESET} ${WHITE}Back to main menu${RESET}" # Back to main menu
+            echo -e "  ${YELLOW}3)${RESET} ${WHITE}Edit ports${RESET}" # Edit ports
+            echo -e "  ${YELLOW}4)${RESET} ${WHITE}Delete a client${RESET}" # Delete a client
+            echo -e "  ${YELLOW}5)${RESET} ${BLUE}Schedule client restart${RESET}" # Schedule client restart
+            echo -e "  ${YELLOW}6)${RESET} ${RED}Delete scheduled restart${RESET}" # New option: Delete scheduled restart
+            echo -e "  ${YELLOW}7)${RESET} ${WHITE}Back to main menu${RESET}" # Back to main menu
             echo ""
             draw_line "$GREEN" "-" 40 # Bottom border
             echo -e "👉 ${CYAN}Your choice:${RESET} " # Your choice:
@@ -185,6 +190,9 @@ while true; do
                 fi
               ;;
               3)
+                edit_client_ports_action
+              ;;
+              4)
                 clear
                 echo ""
                 draw_line "$CYAN" "=" 40
@@ -233,7 +241,7 @@ while true; do
                   read -p ""
                 fi
               ;;
-              4) # Schedule client restart
+              5) # Schedule client restart
                 clear
                 echo ""
                 draw_line "$CYAN" "=" 40
@@ -268,10 +276,10 @@ while true; do
                   done
                 fi
                 ;;
-              5) # New case for deleting cron job in client menu
+              6) # New case for deleting cron job in client menu
                 delete_cron_job_action
               ;;
-              6)
+              7)
                 echo -e "${YELLOW}بازگشت به منوی اصلی...${RESET}" # Returning to main menu...
                 break 2 # Break out of both inner while and outer case
               ;;
@@ -329,10 +337,11 @@ while true; do
             echo ""
             echo -e "  ${YELLOW}1)${RESET} ${WHITE}Add new direct server${RESET}"
             echo -e "  ${YELLOW}2)${RESET} ${WHITE}Show direct service logs${RESET}"
-            echo -e "  ${YELLOW}3)${RESET} ${WHITE}Delete direct service${RESET}"
-            echo -e "  ${YELLOW}4)${RESET} ${MAGENTA}Schedule direct server restart${RESET}"
-            echo -e "  ${YELLOW}5)${RESET} ${RED}Delete scheduled restart${RESET}"
-            echo -e "  ${YELLOW}6)${RESET} ${WHITE}Back to main menu${RESET}"
+            echo -e "  ${YELLOW}3)${RESET} ${WHITE}Edit ports${RESET}"
+            echo -e "  ${YELLOW}4)${RESET} ${WHITE}Delete direct service${RESET}"
+            echo -e "  ${YELLOW}5)${RESET} ${MAGENTA}Schedule direct server restart${RESET}"
+            echo -e "  ${YELLOW}6)${RESET} ${RED}Delete scheduled restart${RESET}"
+            echo -e "  ${YELLOW}7)${RESET} ${WHITE}Back to main menu${RESET}"
             echo ""
             draw_line "$GREEN" "-" 40
             echo -e "👉 ${CYAN}Your choice:${RESET} "
@@ -355,6 +364,9 @@ while true; do
                 fi
                 ;;
               3)
+                edit_direct_server_ports_action
+              ;;
+              4)
                 clear
                 service_file="/etc/systemd/system/trusttunnel-direct.service"
                 if [ -f "$service_file" ]; then
@@ -371,13 +383,13 @@ while true; do
                 echo -e "${YELLOW}Press Enter to return to previous menu...${RESET}"
                 read -p ""
                 ;;
-              4)
+              5)
                 reset_timer "trusttunnel-direct"
                 ;;
-              5)
+              6)
                 delete_cron_job_action
                 ;;
-              6)
+              7)
                 echo -e "${YELLOW}بازگشت به منوی اصلی...${RESET}" # Returning to main menu...
                 break 2
                 ;;
@@ -401,10 +413,11 @@ while true; do
             echo ""
             echo -e "  ${YELLOW}1)${RESET} ${WHITE}Add new direct client${RESET}"
             echo -e "  ${YELLOW}2)${RESET} ${WHITE}Show Direct Client Log${RESET}"
-            echo -e "  ${YELLOW}3)${RESET} ${WHITE}Delete a direct client${RESET}"
-            echo -e "  ${YELLOW}4)${RESET} ${BLUE}Schedule direct client restart${RESET}"
-            echo -e "  ${YELLOW}5)${RESET} ${RED}Delete scheduled restart${RESET}"
-            echo -e "  ${YELLOW}6)${RESET} ${WHITE}Back to main menu${RESET}"
+            echo -e "  ${YELLOW}3)${RESET} ${WHITE}Edit ports${RESET}"
+            echo -e "  ${YELLOW}4)${RESET} ${WHITE}Delete a direct client${RESET}"
+            echo -e "  ${YELLOW}5)${RESET} ${BLUE}Schedule direct client restart${RESET}"
+            echo -e "  ${YELLOW}6)${RESET} ${RED}Delete scheduled restart${RESET}"
+            echo -e "  ${YELLOW}7)${RESET} ${WHITE}Back to main menu${RESET}"
             echo ""
             draw_line "$GREEN" "-" 40
             echo -e "👉 ${CYAN}Your choice:${RESET} "
@@ -450,6 +463,9 @@ while true; do
                 fi
                 ;;
               3)
+                edit_direct_client_ports_action
+              ;;
+              4)
                 clear
                 echo ""
                 draw_line "$CYAN" "=" 40
@@ -492,7 +508,7 @@ while true; do
                   read -p ""
                 fi
                 ;;
-              4)
+              5)
                 clear
                 echo ""
                 draw_line "$CYAN" "=" 40
@@ -523,10 +539,10 @@ while true; do
                   done
                 fi
                 ;;
-              5)
+              6)
                 delete_cron_job_action
                 ;;
-              6)
+              7)
                 echo -e "${YELLOW}بازگشت به منوی اصلی...${RESET}" # Returning to main menu...
                 break 2
                 ;;
