@@ -345,3 +345,178 @@ EOF
   echo -e "${YELLOW}Press Enter to return to previous menu...${RESET}" # Press Enter to return to previous menu...
   read -p ""
 }
+edit_server_ports_action() {
+  clear
+  echo ""
+  draw_line "$CYAN" "=" 40
+  echo -e "${CYAN}     ✏️ Edit TrustTunnel Server Ports${RESET}"
+  draw_line "$CYAN" "=" 40
+  echo ""
+
+  local service_file="/etc/systemd/system/trusttunnel.service"
+  if [ ! -f "$service_file" ]; then
+    echo -e "${RED}❌ trusttunnel.service not found. Please add server first.${RESET}"
+    echo ""
+    echo -e "${YELLOW}Press Enter to return to previous menu...${RESET}"
+    read -p ""
+    return
+  fi
+
+  local current_listen_port=$(grep -oP '--addr 0\.0\.0\.0:\K[0-9]+' "$service_file")
+  local current_tcp_port=$(grep -oP '--tcp-upstream \K[0-9]+' "$service_file")
+  local current_udp_port=$(grep -oP '--udp-upstream \K[0-9]+' "$service_file")
+
+  echo -e "Current tunneling port: ${WHITE}$current_listen_port${RESET}"
+  echo -e "Current TCP upstream port: ${WHITE}$current_tcp_port${RESET}"
+  echo -e "Current UDP upstream port: ${WHITE}$current_udp_port${RESET}"
+  echo ""
+
+  local listen_port
+  while true; do
+    echo -e "👉 ${WHITE}New tunneling address port (1-65535, default $current_listen_port):${RESET} "
+    read -p "" input
+    listen_port=${input:-$current_listen_port}
+    if validate_port "$listen_port"; then
+      break
+    else
+      print_error "Invalid port number."
+    fi
+  done
+
+  local tcp_upstream_port
+  while true; do
+    echo -e "👉 ${WHITE}New TCP upstream port (1-65535, default $current_tcp_port):${RESET} "
+    read -p "" input
+    tcp_upstream_port=${input:-$current_tcp_port}
+    if validate_port "$tcp_upstream_port"; then
+      break
+    else
+      print_error "Invalid port number."
+    fi
+  done
+
+  local udp_upstream_port
+  while true; do
+    echo -e "👉 ${WHITE}New UDP upstream port (1-65535, default $current_udp_port):${RESET} "
+    read -p "" input
+    udp_upstream_port=${input:-$current_udp_port}
+    if validate_port "$udp_upstream_port"; then
+      break
+    else
+      print_error "Invalid port number."
+    fi
+  done
+
+  sudo sed -i "s/--addr 0\.0\.0\.0:$current_listen_port/--addr 0.0.0.0:$listen_port/" "$service_file"
+  sudo sed -i "s/--tcp-upstream $current_tcp_port/--tcp-upstream $tcp_upstream_port/" "$service_file"
+  sudo sed -i "s/--udp-upstream $current_udp_port/--udp-upstream $udp_upstream_port/" "$service_file"
+
+  sudo systemctl daemon-reload
+  sudo systemctl restart trusttunnel.service
+  print_success "Server ports updated."
+  echo ""
+  echo -e "${YELLOW}Press Enter to return to previous menu...${RESET}"
+  read -p ""
+}
+
+edit_client_ports_action() {
+  clear
+  echo ""
+  draw_line "$CYAN" "=" 40
+  echo -e "${CYAN}     ✏️ Edit TrustTunnel Client Ports${RESET}"
+  draw_line "$CYAN" "=" 40
+  echo ""
+
+  mapfile -t services < <(systemctl list-unit-files --full --no-pager | grep '^trusttunnel-' | awk '{print $1}' | sed 's/.service$//')
+
+  if [ ${#services[@]} -eq 0 ]; then
+    echo -e "${RED}❌ No clients found.${RESET}"
+    echo ""
+    echo -e "${YELLOW}Press Enter to return to previous menu...${RESET}"
+    read -p ""
+    return
+  fi
+
+  services+=("Back to previous menu")
+  echo -e "${CYAN}📋 Please select a client:${RESET}"
+  select selected_service in "${services[@]}"; do
+    if [[ "$selected_service" == "Back to previous menu" ]]; then
+      return
+    elif [ -n "$selected_service" ]; then
+      service_file="/etc/systemd/system/${selected_service}.service"
+      break
+    else
+      echo -e "${RED}⚠️ Invalid selection. Please enter a valid number.${RESET}"
+    fi
+  done
+
+  local exec_line=$(grep ExecStart "$service_file")
+  local bin_path=$(echo "$exec_line" | cut -d' ' -f1 | cut -d'=' -f2)
+  local server_addr=$(echo "$exec_line" | grep -oP '--server-addr "\K[^\"]+')
+  local password=$(echo "$exec_line" | grep -oP '--password "\K[^\"]+')
+
+  echo ""
+  echo -e "${CYAN}📡 Tunnel Mode:${RESET}"
+  echo -e "  (tcp/udp/both)"
+  echo -e "👉 ${WHITE}Tunnel mode ? (tcp/udp/both):${RESET} "
+  read -p "" tunnel_mode
+  echo ""
+
+  local port_count
+  while true; do
+    echo -e "👉 ${WHITE}How many ports to tunnel?${RESET} "
+    read -p "" port_count_input
+    if [[ "$port_count_input" =~ ^[0-9]+$ ]] && (( port_count_input >= 0 )); then
+      port_count=$port_count_input
+      break
+    else
+      print_error "Invalid input. Please enter a non-negative number for port count."
+    fi
+  done
+  echo ""
+
+  mappings=""
+  for ((i=1; i<=port_count; i++)); do
+    local port
+    while true; do
+      echo -e "👉 ${WHITE}Enter Port #$i (1-65535):${RESET} "
+      read -p "" port_input
+      if validate_port "$port_input"; then
+        port="$port_input"
+        break
+      else
+        print_error "Invalid port number. Please enter a number between 1 and 65535."
+      fi
+    done
+    mapping="IN^0.0.0.0:$port^0.0.0.0:$port"
+    [ -z "$mappings" ] && mappings="$mapping" || mappings="$mappings,$mapping"
+    echo ""
+  done
+
+  mapping_args=""
+  case "$tunnel_mode" in
+    "tcp")
+      mapping_args="--tcp-mappings \"$mappings\""
+      ;;
+    "udp")
+      mapping_args="--udp-mappings \"$mappings\""
+      ;;
+    "both")
+      mapping_args="--tcp-mappings \"$mappings\" --udp-mappings \"$mappings\""
+      ;;
+    *)
+      echo -e "${YELLOW}⚠️ Invalid tunnel mode specified. Using 'both' as default.${RESET}"
+      mapping_args="--tcp-mappings \"$mappings\" --udp-mappings \"$mappings\""
+      ;;
+  esac
+
+  local new_exec="${bin_path} --server-addr \"$server_addr\" --password \"$password\" ${mapping_args} --quic-timeout-ms 1000 --tcp-timeout-ms 1000 --udp-timeout-ms 1000 --wait-before-retry-ms 3000"
+  sudo sed -i "s|^ExecStart=.*|ExecStart=${new_exec}|" "$service_file"
+
+  sudo systemctl daemon-reload
+  sudo systemctl restart "${selected_service}.service"
+  print_success "Client ports updated for '$selected_service'"
+  echo ""
+  echo -e "${YELLOW}Press Enter to return to previous menu...${RESET}"
+  read -p ""
+}

@@ -21,6 +21,7 @@ Note: The `alpha.sh` and `beta.sh` scripts are now simple wrappers that call `ma
 - View logs of specific clients
 - Interactive CLI with colorful UI
 - Easy integration with Xray/V2Ray/Wireguard/etc.
+- Edit ports of existing server and client services
 
 ### My social accounts
 
