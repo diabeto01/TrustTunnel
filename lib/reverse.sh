@@ -345,78 +345,228 @@ EOF
   echo -e "${YELLOW}Press Enter to return to previous menu...${RESET}" # Press Enter to return to previous menu...
   read -p ""
 }
-edit_server_ports_action() {
-  clear
-  echo ""
-  draw_line "$CYAN" "=" 40
-  echo -e "${CYAN}     ✏️ Edit TrustTunnel Server Ports${RESET}"
-  draw_line "$CYAN" "=" 40
-  echo ""
+edit_server_listen_port() {
+  local service_file="$1"
+  local current_listen_port=$(grep -oP '--addr 0\.0\.0\.0:\K[0-9]+' "$service_file")
 
+  echo -e "Current tunneling port: ${WHITE}$current_listen_port${RESET}"
+  echo -e "  ${YELLOW}1)${RESET} Edit"
+  echo -e "  ${YELLOW}2)${RESET} Delete"
+  echo -e "  ${YELLOW}3)${RESET} Back"
+  read -p "👉 " choice
+  case $choice in
+    1)
+      local new_port
+      while true; do
+        echo -e "👉 ${WHITE}Enter new port (1-65535, default $current_listen_port):${RESET} "
+        read -p "" input
+        new_port=${input:-$current_listen_port}
+        if validate_port "$new_port"; then
+          sudo sed -i "s/--addr 0\.0\.0\.0:$current_listen_port/--addr 0.0.0.0:$new_port/" "$service_file"
+          print_success "Tunneling address updated."
+          break
+        else
+          print_error "Invalid port number."
+        fi
+      done
+      ;;
+    2)
+      sudo sed -i "s/--addr 0\.0\.0\.0:$current_listen_port//" "$service_file"
+      print_success "Tunneling address removed."
+      ;;
+    *)
+      ;;
+  esac
+}
+
+manage_server_tunnel_ports() {
+  local service_file="$1"
+  local tcp_map=$(grep -oP '--tcp-mappings "\K[^"]+' "$service_file")
+  local udp_map=$(grep -oP '--udp-mappings "\K[^"]+' "$service_file")
+  local map_string="${tcp_map:-$udp_map}"
+  if [ -z "$map_string" ]; then
+    echo -e "${YELLOW}No tunnel ports configured.${RESET}"
+    echo -e "  ${YELLOW}1)${RESET} Add port"
+    echo -e "  ${YELLOW}2)${RESET} Back"
+    read -p "👉 " subc
+    if [ "$subc" = "1" ]; then
+      read -p "Enter port to add: " newp
+      if validate_port "$newp"; then
+        map_string="IN^0.0.0.0:$newp^0.0.0.0:$newp"
+      fi
+    fi
+  else
+    IFS=',' read -ra entries <<< "$map_string"
+    while true; do
+      echo -e "${CYAN}Current tunnel ports:${RESET}"
+      ports=()
+      for e in "${entries[@]}"; do
+        port=$(echo "$e" | grep -oP '0\.0\.0\.0:\K[0-9]+' | head -n1)
+        ports+=("$port")
+      done
+      for i in "${!ports[@]}"; do
+        echo -e "  ${YELLOW}$((i+1)))${RESET} ${WHITE}${ports[$i]}${RESET}"
+      done
+      echo -e "  ${YELLOW}A)${RESET} Add new port"
+      echo -e "  ${YELLOW}B)${RESET} Back"
+      read -p "👉 " action
+      case $action in
+        [Aa])
+          read -p "Enter port: " np
+          if validate_port "$np"; then
+            entries+=("IN^0.0.0.0:$np^0.0.0.0:$np")
+          else
+            print_error "Invalid port."
+          fi
+          ;;
+        [Bb])
+          break
+          ;;
+        *)
+          if [[ "$action" =~ ^[0-9]+$ ]] && [ "$action" -ge 1 ] && [ "$action" -le ${#ports[@]} ]; then
+            idx=$((action-1))
+            echo -e "  ${YELLOW}1)${RESET} Edit ${ports[$idx]}"
+            echo -e "  ${YELLOW}2)${RESET} Delete ${ports[$idx]}"
+            echo -e "  ${YELLOW}3)${RESET} Back"
+            read -p "👉 " ed
+            case $ed in
+              1)
+                read -p "Enter new port: " np
+                if validate_port "$np"; then
+                  entries[$idx]="IN^0.0.0.0:$np^0.0.0.0:$np"
+                else
+                  print_error "Invalid port."
+                fi
+                ;;
+              2)
+                unset 'entries[$idx]'
+                entries=("${entries[@]}")
+                ;;
+            esac
+          fi
+          ;;
+      esac
+    done
+  fi
+  if [ -n "$map_string" ] || [ ${#entries[@]} -gt 0 ]; then
+    [ ${#entries[@]} -gt 0 ] && map_string=$(IFS=','; echo "${entries[*]}")
+    if [ -n "$tcp_map" ]; then
+      sudo sed -i "s|--tcp-mappings \"[^\"]*\"|--tcp-mappings \"$map_string\"|" "$service_file"
+    fi
+    if [ -n "$udp_map" ]; then
+      sudo sed -i "s|--udp-mappings \"[^\"]*\"|--udp-mappings \"$map_string\"|" "$service_file"
+    fi
+    print_success "Tunnel ports updated."
+  fi
+}
+
+edit_server_tcp_upstream_port() {
+  local service_file="$1"
+  local current_tcp_port=$(grep -oP '--tcp-upstream \K[0-9]+' "$service_file")
+  echo -e "Current TCP upstream port: ${WHITE}$current_tcp_port${RESET}"
+  echo -e "  ${YELLOW}1)${RESET} Edit"
+  echo -e "  ${YELLOW}2)${RESET} Delete"
+  echo -e "  ${YELLOW}3)${RESET} Back"
+  read -p "👉 " choice
+  case $choice in
+    1)
+      local new_port
+      while true; do
+        echo -e "👉 ${WHITE}Enter new TCP upstream port (1-65535, default $current_tcp_port):${RESET} "
+        read -p "" input
+        new_port=${input:-$current_tcp_port}
+        if validate_port "$new_port"; then
+          sudo sed -i "s/--tcp-upstream $current_tcp_port/--tcp-upstream $new_port/" "$service_file"
+          print_success "TCP upstream port updated."
+          break
+        else
+          print_error "Invalid port number."
+        fi
+      done
+      ;;
+    2)
+      sudo sed -i "s/--tcp-upstream $current_tcp_port//" "$service_file"
+      print_success "TCP upstream port removed."
+      ;;
+  esac
+}
+
+edit_server_udp_upstream_port() {
+  local service_file="$1"
+  local current_udp_port=$(grep -oP '--udp-upstream \K[0-9]+' "$service_file")
+  echo -e "Current UDP upstream port: ${WHITE}$current_udp_port${RESET}"
+  echo -e "  ${YELLOW}1)${RESET} Edit"
+  echo -e "  ${YELLOW}2)${RESET} Delete"
+  echo -e "  ${YELLOW}3)${RESET} Back"
+  read -p "👉 " choice
+  case $choice in
+    1)
+      local new_port
+      while true; do
+        echo -e "👉 ${WHITE}Enter new UDP upstream port (1-65535, default $current_udp_port):${RESET} "
+        read -p "" input
+        new_port=${input:-$current_udp_port}
+        if validate_port "$new_port"; then
+          sudo sed -i "s/--udp-upstream $current_udp_port/--udp-upstream $new_port/" "$service_file"
+          print_success "UDP upstream port updated."
+          break
+        else
+          print_error "Invalid port number."
+        fi
+      done
+      ;;
+    2)
+      sudo sed -i "s/--udp-upstream $current_udp_port//" "$service_file"
+      print_success "UDP upstream port removed."
+      ;;
+  esac
+}
+
+edit_server_ports_action() {
   local service_file="/etc/systemd/system/trusttunnel.service"
   if [ ! -f "$service_file" ]; then
     echo -e "${RED}❌ trusttunnel.service not found. Please add server first.${RESET}"
-    echo ""
     echo -e "${YELLOW}Press Enter to return to previous menu...${RESET}"
     read -p ""
     return
   fi
 
-  local current_listen_port=$(grep -oP '--addr 0\.0\.0\.0:\K[0-9]+' "$service_file")
-  local current_tcp_port=$(grep -oP '--tcp-upstream \K[0-9]+' "$service_file")
-  local current_udp_port=$(grep -oP '--udp-upstream \K[0-9]+' "$service_file")
-
-  echo -e "Current tunneling port: ${WHITE}$current_listen_port${RESET}"
-  echo -e "Current TCP upstream port: ${WHITE}$current_tcp_port${RESET}"
-  echo -e "Current UDP upstream port: ${WHITE}$current_udp_port${RESET}"
-  echo ""
-
-  local listen_port
   while true; do
-    echo -e "👉 ${WHITE}New tunneling address port (1-65535, default $current_listen_port):${RESET} "
-    read -p "" input
-    listen_port=${input:-$current_listen_port}
-    if validate_port "$listen_port"; then
-      break
-    else
-      print_error "Invalid port number."
-    fi
+    clear
+    echo ""
+    draw_line "$CYAN" "=" 40
+    echo -e "${CYAN}     ✏️ Edit TrustTunnel Server Ports${RESET}"
+    draw_line "$CYAN" "=" 40
+    echo ""
+    echo -e "  ${YELLOW}1)${RESET} Edit tunneling address"
+    echo -e "  ${YELLOW}2)${RESET} Edit tunnel ports"
+    echo -e "  ${YELLOW}3)${RESET} Edit TCP upstream port"
+    echo -e "  ${YELLOW}4)${RESET} Edit UDP upstream port"
+    echo -e "  ${YELLOW}5)${RESET} Back"
+    read -p "👉 " choice
+    case $choice in
+      1)
+        edit_server_listen_port "$service_file"
+        ;;
+      2)
+        manage_server_tunnel_ports "$service_file"
+        ;;
+      3)
+        edit_server_tcp_upstream_port "$service_file"
+        ;;
+      4)
+        edit_server_udp_upstream_port "$service_file"
+        ;;
+      5)
+        sudo systemctl daemon-reload
+        sudo systemctl restart trusttunnel.service
+        break
+        ;;
+    esac
+    echo ""
+    echo -e "${YELLOW}Press Enter to continue...${RESET}"
+    read -p ""
   done
-
-  local tcp_upstream_port
-  while true; do
-    echo -e "👉 ${WHITE}New TCP upstream port (1-65535, default $current_tcp_port):${RESET} "
-    read -p "" input
-    tcp_upstream_port=${input:-$current_tcp_port}
-    if validate_port "$tcp_upstream_port"; then
-      break
-    else
-      print_error "Invalid port number."
-    fi
-  done
-
-  local udp_upstream_port
-  while true; do
-    echo -e "👉 ${WHITE}New UDP upstream port (1-65535, default $current_udp_port):${RESET} "
-    read -p "" input
-    udp_upstream_port=${input:-$current_udp_port}
-    if validate_port "$udp_upstream_port"; then
-      break
-    else
-      print_error "Invalid port number."
-    fi
-  done
-
-  sudo sed -i "s/--addr 0\.0\.0\.0:$current_listen_port/--addr 0.0.0.0:$listen_port/" "$service_file"
-  sudo sed -i "s/--tcp-upstream $current_tcp_port/--tcp-upstream $tcp_upstream_port/" "$service_file"
-  sudo sed -i "s/--udp-upstream $current_udp_port/--udp-upstream $udp_upstream_port/" "$service_file"
-
-  sudo systemctl daemon-reload
-  sudo systemctl restart trusttunnel.service
-  print_success "Server ports updated."
-  echo ""
-  echo -e "${YELLOW}Press Enter to return to previous menu...${RESET}"
-  read -p ""
 }
 
 edit_client_ports_action() {
